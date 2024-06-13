@@ -71,4 +71,7 @@ class TagDetailApiView(APIView):
         tag = self.get_object(tag_id)
 
         tag.delete()
-        return Response(status=status.HTTP_200_OK)
+        response_msg = {
+            "message": "Successfully deleted"
+        }
+        return Response(data=response_msg, status=status.HTTP_200_OK)
