@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # local
-    'apps.tasks.apps.TasksConfig'
+    'apps.tasks.apps.TasksConfig',
+    'apps.projects.apps.ProjectsConfig'
 
 ]
 
