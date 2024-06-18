@@ -34,11 +34,11 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
     def validate_file_name(self, value):
         # file_name = value.split(".")[0] TODO: ACSII
         if not value.isascii():
-            return serializers.ValidationError(
+            raise serializers.ValidationError(
                 "File name is not ASCII"
             )
         if not validate_file_extension(value):
-            return serializers.ValidationError(
+            raise serializers.ValidationError(
                 "File extension should be one of this type: .pdf, .csv, .doc, .xlsx"
             )
         return value
@@ -46,14 +46,17 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         project = self.context.get("project", None)
         file = self.context.get("file", None)
-        file_path = create_file_path(file_name=validated_data.get("file_name"), project_name=project.name)
+
+        file_path = create_file_path(
+            file_name=validated_data.get("file_name"),
+            project_name=project.name
+        )
         if not validate_file_size(file):
-            return serializers.ValidationError(
+            raise serializers.ValidationError(
                 "File should be less than 2 Mb."
             )
         save_file(file, file_path)
         validated_data["file_path"] = file_path
-        project_file = ProjectFile(**validated_data)
-        project_file.save()
+        project_file = ProjectFile.objects.create(**validated_data)
         project_file.project.add(project)
         return project_file

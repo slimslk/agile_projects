@@ -2,7 +2,7 @@ import os.path
 from pathlib import Path
 
 EXTENSIONS = (".pdf", ".csv", ".doc", ".xlsx")
-FILE_PATH = "documents/"
+FILE_PATH = "documents"
 MAX_SIZE = 2
 
 

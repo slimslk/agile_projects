@@ -8,17 +8,24 @@ from apps.projects.serializers.project_file_serializers import CreateProjectFile
 
 
 class ProjectFileListGenericView(ListCreateAPIView):
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == 'POST':
+            return CreateProjectFileSerializer
 
     def post(self, request: Request, *args, **kwargs) -> Response:
         file = request.FILES.get("file", None)
         project_id = request.data.get("project_id", None)
         request.data["file_name"] = file.name if file else None
-        project = get_object_or_404(Project, project_id)
+
+        project = get_object_or_404(Project, pk=project_id)
+
         context = {
             "file": file,
             "project": project
         }
-        serializer = CreateProjectFileSerializer(data=request.data, context=context)
+
+        serializer = self.get_serializer(data=request.data, context=context)
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
