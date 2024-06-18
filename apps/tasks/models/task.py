@@ -18,7 +18,7 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deadline = models.DateTimeField(default=calculate_end_of_month)
-    assignee = models.ForeignKey(User, on_delete=models.PROTECT, related_name="tasks")
+    assignee = models.ForeignKey(User, on_delete=models.PROTECT, related_name="tasks", blank=True, null=True)
 
     def __str__(self):
         return f"Name: {self.name} | Status: {self.status}"

@@ -4,6 +4,7 @@ from django.utils import timezone
 from apps.tasks.models import Task, Tag
 from apps.projects.models import Project
 from apps.tasks.choices.priorities import Priorities
+from apps.projects.serializers.project_serializers import ProjectShortInfoSerializer
 
 
 class AllTasksSerializer(serializers.ModelSerializer):
@@ -21,7 +22,7 @@ class AllTasksSerializer(serializers.ModelSerializer):
         fields = ('name', 'status', 'priority', 'project', 'assignee', 'deadline')
 
 
-class CreateTaskSerializer(serializers.ModelSerializer):
+class CreateUpdateTaskSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(
         slug_field='name',
         queryset=Project.objects.all()
@@ -42,7 +43,7 @@ class CreateTaskSerializer(serializers.ModelSerializer):
         return value
 
     def validate_priority(self, value):
-        if value not in [item[0] for item in Priorities.choices()] :
+        if value not in [item[0] for item in Priorities.choices()]:
             raise serializers.ValidationError(
                 "The priority of the task couldn't be one of the available options"
             )
@@ -59,7 +60,7 @@ class CreateTaskSerializer(serializers.ModelSerializer):
         return value
 
     def validate_deadline(self, value):
-        value = timezone.make_aware(value, timezone.get_current_timezone())
+        # value = timezone.make_aware(value, timezone.get_current_timezone())
         if value < timezone.now():
             raise serializers.ValidationError(
                 'Deadline time can not be in past'
@@ -75,3 +76,21 @@ class CreateTaskSerializer(serializers.ModelSerializer):
             task.tags.add(tag)
         task.save()
         return task
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', [])
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.tags.add(*tags)
+        instance.save()
+        return instance
+
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    project = ProjectShortInfoSerializer()
+
+    class Meta:
+        model = Task
+        exclude = ('updated_at', 'deleted_at')

@@ -1,12 +1,16 @@
+from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework.generics import get_object_or_404
+
 from apps.tasks.models import Task
 from apps.tasks.serializers.tasks_serializers import (
     AllTasksSerializer,
-    CreateTaskSerializer
+    CreateUpdateTaskSerializer,
+    TaskDetailSerializer
 )
 
 
@@ -46,11 +50,12 @@ class AllTasksListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        serializer = CreateTaskSerializer(data=request.data)
+        serializer = CreateUpdateTaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Sample post query
 # {
@@ -61,3 +66,32 @@ class AllTasksListAPIView(APIView):
 #     "tags": ["Backend", "Frontend"]
 #     "deadline": "2024-06-30"
 # }
+
+class TaskDetailAPIView(APIView):
+    def get_object(self):
+        return get_object_or_404(Task, pk=self.kwargs['pk'])
+
+    def get(self, request: Request, *args, **kwargs):
+        task = self.get_object()
+        serializer = TaskDetailSerializer(task)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request: Request, *args, **kwargs):
+        task = self.get_object()
+        serializer = TaskDetailSerializer(instance=task, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request: Request, *args, **kwargs):
+        task = self.get_object()
+
+        task.delete()
+
+        delete_message = {
+            "message": "Task was successfully deleted"
+        }
+        return Response(data=delete_message, status=status.HTTP_200_OK)
