@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from apps.tasks.models import Task
+from django.utils import timezone
+
+from apps.tasks.models import Task, Tag
+from apps.projects.models import Project
+from apps.tasks.choices.priorities import Priorities
 
 
 class AllTasksSerializer(serializers.ModelSerializer):
@@ -17,3 +21,57 @@ class AllTasksSerializer(serializers.ModelSerializer):
         fields = ('name', 'status', 'priority', 'project', 'assignee', 'deadline')
 
 
+class CreateTaskSerializer(serializers.ModelSerializer):
+    project = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Project.objects.all()
+    )
+
+    class Meta:
+        model = Task
+        fields = ('name', 'description', 'priority', 'project', 'tags', 'deadline')
+
+    def validate_name(self, value):
+        if len(value) < 10:
+            raise serializers.ValidationError('Name must be at least 10 characters')
+        return value
+
+    def validate_description(self, value):
+        if len(value) < 50:
+            raise serializers.ValidationError('Description must be at least 50 characters')
+        return value
+
+    def validate_priority(self, value):
+        if value not in [item[0] for item in Priorities.choices()] :
+            raise serializers.ValidationError(
+                "The priority of the task couldn't be one of the available options"
+            )
+        return value
+
+    def validate_project(self, value):
+        if not Project.objects.filter(name=value).exists():
+            raise serializers.ValidationError('Project not found')
+        return value
+
+    def validate_tags(self, value):
+        if not Tag.objects.filter(name__in=value).exists():
+            raise serializers.ValidationError('Tags not found')
+        return value
+
+    def validate_deadline(self, value):
+        value = timezone.make_aware(value, timezone.get_current_timezone())
+        if value < timezone.now():
+            raise serializers.ValidationError(
+                'Deadline time can not be in past'
+            )
+        return value
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags', [])
+        task = Task.objects.create(
+            **validated_data
+        )
+        for tag in tags:
+            task.tags.add(tag)
+        task.save()
+        return task
