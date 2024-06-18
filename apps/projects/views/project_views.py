@@ -4,11 +4,12 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.utils import timezone
 from datetime import datetime
+from rest_framework.generics import get_object_or_404
 
 from apps.projects.models import Project
 from apps.projects.serializers.project_serializers import (
     CreateUpdateProjectSerializer,
-    AllProjectsSerializer
+    AllProjectsSerializer, ProjectDetailSerializer
 )
 
 
@@ -26,7 +27,7 @@ class ProjectListAPIView(APIView):
             return projects
         return Project.objects.all()
 
-    def get(self, request:Request) -> Response:
+    def get(self, request: Request) -> Response:
         date_from = request.query_params.get('date_from')
         date_to = request.query_params.get('date_to')
         projects = self.get_objects(date_from, date_to)
@@ -42,7 +43,7 @@ class ProjectListAPIView(APIView):
             status=status.HTTP_200_OK
         )
 
-    def post(self, request:Request) -> Response:
+    def post(self, request: Request) -> Response:
         serializer = CreateUpdateProjectSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -54,4 +55,46 @@ class ProjectListAPIView(APIView):
         return Response(
             data=serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class ProjectDetailAPIView(APIView):
+
+    def get_object(self):
+        return get_object_or_404(Project, pk=self.kwargs.get('pk'))
+
+    def get(self, request: Request, *args, **kwargs) -> Response:
+        project = self.get_object()
+        serializer = ProjectDetailSerializer(project)
+
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+    def put(self, request: Request, *args, **kwargs) -> Response:
+        project = self.get_object()
+        serializer = CreateUpdateProjectSerializer(project, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            data=serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def delete(self, request: Request, *args, **kwargs) -> Response:
+        project = self.get_object()
+        project.delete()
+
+        return Response(
+            data={
+                'message': 'Project deleted successfully'
+            },
+            status=status.HTTP_200_OK
         )
