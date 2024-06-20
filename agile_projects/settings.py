@@ -46,8 +46,8 @@ INSTALLED_APPS = [
 
     # local
     'apps.tasks.apps.TasksConfig',
-    'apps.projects.apps.ProjectsConfig'
-
+    'apps.projects.apps.ProjectsConfig',
+    'apps.users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +103,7 @@ else:
         }
     }
 
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

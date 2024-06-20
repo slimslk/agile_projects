@@ -1,10 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 from apps.projects.models import Project
 from apps.tasks.choices.priorities import Priorities
 from apps.tasks.choices.statuses import Statuses
 from apps.tasks.utils.set_date_time import calculate_end_of_month
+from apps.users.models import User
 
 
 class Task(models.Model):
