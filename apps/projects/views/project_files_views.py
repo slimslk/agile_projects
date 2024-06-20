@@ -1,7 +1,9 @@
+from django.http import FileResponse
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, get_object_or_404
+from rest_framework.views import APIView
 
 from apps.projects.models import Project, ProjectFile
 from apps.projects.serializers.project_file_serializers import (
@@ -58,3 +60,13 @@ class ProjectFileListGenericView(ListCreateAPIView):
             data=serializer.data,
             status=status.HTTP_201_CREATED
         )
+
+
+class ProjectFileDownloadApiView(APIView):
+    def get(self, request: Request, *args, **kwargs) -> FileResponse | Response:
+        project_object = get_object_or_404(ProjectFile, pk=self.kwargs.get("pk"))
+
+        file = project_object.file_path.open()
+        response = FileResponse(file, as_attachment=True)
+        return response
+
