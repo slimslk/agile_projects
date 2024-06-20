@@ -1,10 +1,10 @@
 from rest_framework import status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.users.models import User
-from apps.users.serializers import UserListSerializer
+from apps.users.serializers import UserListSerializer, RegisterUserSerializer
 
 
 class UserListGenericView(ListAPIView):
@@ -32,3 +32,15 @@ class UserListGenericView(ListAPIView):
                 status=status.HTTP_204_NO_CONTENT
             )
 
+
+class RegisterUserGenericView(CreateAPIView):
+    serializer_class = RegisterUserSerializer
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK
+        )
