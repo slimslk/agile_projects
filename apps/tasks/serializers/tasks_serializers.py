@@ -36,7 +36,7 @@ class CreateUpdateTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('name', 'description', 'priority', 'assignee', 'project', 'tags', 'deadline')
+        fields = ('name', 'description', 'priority', 'status', 'assignee', 'project', 'tags', 'deadline')
 
     def validate_name(self, value):
         if len(value) < 10:
