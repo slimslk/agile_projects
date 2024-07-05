@@ -12,6 +12,7 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "id",
             "first_name",
             "last_name",
             "position",
@@ -19,6 +20,7 @@ class UserListSerializer(serializers.ModelSerializer):
             "phone",
             "last_login"
         ]
+
 
 class RegisterUserSerializer(serializers.ModelSerializer):
 
@@ -46,7 +48,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
         if not re.match('^[A-Za-z0-9_.]+$', user_name):
             raise serializers.ValidationError(
-                {'user_name': 'The username must be alphanumeric characters or have only _ . symbols.'}
+                {'user_name': 'The username must be alphanumeric characters or have only "_" or "." symbols.'}
             )
         if not re.match('^[A-Za-z]+$', first_name):
             raise serializers.ValidationError(
@@ -81,3 +83,17 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'position',
+            'project'
+        ]

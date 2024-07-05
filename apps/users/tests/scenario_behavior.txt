@@ -1,0 +1,26 @@
+Feature: Retrieving information about the User
+   As a user
+   I want to be able to retrieve information about a specific user
+   So that I can view its details
+
+   Scenario: Successfully retrieving information about the user by ID
+     Given: User exists with ID "1"
+     When: I send a GET-request to "/users/1/"
+     Then: I receive a response with status "200 OK"
+     And: Response contains the following info:
+       | field      | value                       |
+       | username   | "dimm_test_user_retrieve"   |
+       | first_name | "Dimm"                      |
+       | last_name  | "Midd"                      |
+       | email      | "dimm.midd@test.com"        |
+       | phone      | "+490001118877"             |
+       | position   | Ceo                         |
+       | project    | SAPHYR INC                  |
+
+
+
+    Scenario: Retrieving information about a user by non-existent ID
+      Given: There are no user with ID "999"
+      When: I send GET-request to "/users/999/"
+      Then: I receive a response with status "404 Not Found"
+      And: Response contains "No User matches the given query."

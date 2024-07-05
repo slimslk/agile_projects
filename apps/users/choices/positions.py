@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Positions(Enum):
-    CEO = "Ceo"
+    CEO = "CEO"
     CTO = "Cto"
     DESIGNER = "Designer"
     PROGRAMMER = "Programmer"

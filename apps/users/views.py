@@ -1,10 +1,10 @@
 from rest_framework import status
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.users.models import User
-from apps.users.serializers import UserListSerializer, RegisterUserSerializer
+from apps.users.serializers import UserListSerializer, RegisterUserSerializer, UserDetailSerializer
 
 
 class UserListGenericView(ListAPIView):
@@ -42,5 +42,12 @@ class RegisterUserGenericView(CreateAPIView):
         serializer.save()
         return Response(
             data=serializer.data,
-            status=status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
+
+
+class UserDetailView(RetrieveAPIView):
+    serializer_class = UserDetailSerializer
+
+    def get_object(self):
+        return get_object_or_404(User, pk=self.kwargs['pk'])
