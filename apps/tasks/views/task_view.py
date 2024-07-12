@@ -1,3 +1,5 @@
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
@@ -21,6 +23,14 @@ class TaskPagination(PageNumberPagination):
 
 
 class AllTasksListAPIView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            self.permission_classes = [IsAuthenticated]
+        elif self.request.method == 'POST':
+            self.permission_classes = [IsAuthenticated | IsAdminUser]
+
+        return [permission() for permission in self.permission_classes]
+
     def get_objects(self):
         project_name = self.request.query_params.get('project')
         assignee_email = self.request.query_params.get('assignee')
@@ -50,6 +60,9 @@ class AllTasksListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
+        print(self.request.user.is_anonymous)
+        print(self.request.user.is_authenticated)
+        print(self.request.user)
         serializer = CreateUpdateTaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
