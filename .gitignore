@@ -16,3 +16,4 @@ venv/
 .venv/
 db.sqlite3
 .DS_store
+.coverage
