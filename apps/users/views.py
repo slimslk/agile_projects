@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -37,10 +37,16 @@ class RegisterUserGenericView(CreateAPIView):
     serializer_class = RegisterUserSerializer
 
     def create(self, request: Request, *args, **kwargs) -> Response:
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            data=serializer.data,
-            status=status.HTTP_200_OK
-        )
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        except serializers.ValidationError as err:
+            return Response(
+                data=err.args,
+                status=status.HTTP_400_BAD_REQUEST
+            )
