@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Statuses(Enum):
-    NEW = "New"
+    NEW = 'New'
     IN_PROGRESS = "In progress"
     PENDING = "Pending"
     BLOCKED = "Blocked"
@@ -15,3 +15,4 @@ class Statuses(Enum):
 
     def __str__(self):
         return self.name
+
