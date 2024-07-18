@@ -52,10 +52,10 @@ class TestUserEndpoints(APITestCase):
         attribute='get_queryset',
     )
     def test_get_users_by_project_name(self, mock_get_object):
-        user_by_project_name = [self.user2]
+        user_by_project_name = [self.user1]
 
         mock_queryset = MagicMock(spec=QuerySet)
-        mock_queryset.__iter__.return_value = iter(user_by_project_name)
+        mock_queryset.__iter__.return_value = iter([self.user2])
         mock_get_object.return_value = mock_queryset
 
         response = self.client.get(self.get_users_by_project_name)
